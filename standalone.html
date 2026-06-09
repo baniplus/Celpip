@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <title>CELPIP 12 — Speaking & Listening Prep</title>
+  <meta name="description" content="Minimalist CELPIP prep app focused on Speaking, Listening, Grammar, and Natural Speaking. Target: 12." />
+  <meta name="theme-color" content="#0b0b0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CELPIP 12" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+  <link rel="icon" href="./icons/icon-192.png" />
+  <style>
+:root{
+  --bg:#0b0b0f; --bg2:#121218; --card:#16161e; --card2:#1c1c26;
+  --line:#262633; --txt:#f4f4f6; --mut:#9a9aab; --accent:#6c7bff;
+  --accent2:#8b97ff; --good:#34d399; --bad:#f87171; --warn:#fbbf24;
+  --r:16px; --tab-h:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;
+  font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+#app{
+  max-width:560px; margin:0 auto;
+  padding:0 16px calc(var(--tab-h) + env(safe-area-inset-bottom,0) + 24px);
+  padding-top:env(safe-area-inset-top,0);
+}
+.view{animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* header */
+.hd{display:flex;align-items:center;gap:12px;padding:18px 0 12px;position:sticky;top:0;background:linear-gradient(var(--bg) 70%,transparent);z-index:5}
+.hd h1{font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
+.hd-txt p{color:var(--mut);font-size:.85rem;margin-top:2px}
+.logo{font-size:1.6rem;color:var(--accent)}
+.back{background:var(--card);border:1px solid var(--line);color:var(--txt);width:38px;height:38px;border-radius:50%;font-size:1.5rem;line-height:1;cursor:pointer;flex:none}
+
+/* hero */
+.hero{background:linear-gradient(135deg,#1a1b2e,#141420);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;align-items:center;gap:20px;margin-bottom:18px}
+.hero.compact{padding:16px}
+.hero-target{display:flex;flex-direction:column;align-items:center;padding-right:18px;border-right:1px solid var(--line)}
+.t-num{font-size:3rem;font-weight:800;line-height:1;background:linear-gradient(180deg,#fff,var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.t-lab{font-size:.7rem;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-top:6px}
+.hero-stats{display:flex;gap:18px;flex:1;justify-content:space-around}
+.hero-stats.wide{justify-content:space-between;width:100%}
+.hero-stats div{display:flex;flex-direction:column;align-items:center}
+.hero-stats b{font-size:1.5rem;font-weight:700}
+.hero-stats span{font-size:.72rem;color:var(--mut)}
+
+/* section titles */
+section{margin-bottom:18px}
+h2{font-size:1.05rem;font-weight:600;margin-bottom:10px}
+h3{font-size:1rem;font-weight:600;margin-bottom:8px}
+em{font-style:normal;color:var(--accent2);font-size:.78em;font-weight:600}
+
+/* plan */
+.plan-list{display:flex;flex-direction:column;gap:8px}
+.plan-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;color:var(--txt);font-size:.92rem;cursor:pointer;text-align:left}
+.pi-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--mut);flex:none}
+.pi-dot.on{background:var(--good);border-color:var(--good)}
+.pi-txt{flex:1}
+.pi-go,.row-go,.mc-go{color:var(--mut);font-size:1.3rem}
+
+/* module cards */
+.modules{display:flex;flex-direction:column;gap:10px}
+.mcard{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;cursor:pointer;color:var(--txt);text-align:left;transition:transform .1s,border-color .2s}
+.mcard:active{transform:scale(.98);border-color:var(--accent)}
+.mc-ic{font-size:1.5rem;width:44px;height:44px;display:grid;place-items:center;background:var(--card2);border-radius:12px;flex:none}
+.mc-body{flex:1;display:flex;flex-direction:column;gap:2px}
+.mc-title{font-weight:600}
+.mc-desc{font-size:.8rem;color:var(--mut)}
+
+/* rows / lists */
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;color:var(--txt);text-align:left;transition:border-color .2s}
+.row:active{border-color:var(--accent)}
+.row-n{width:32px;height:32px;border-radius:9px;background:var(--card2);display:grid;place-items:center;font-weight:700;color:var(--accent2);flex:none}
+.row-ic{font-size:1.3rem;width:32px;text-align:center;flex:none}
+.row-body{flex:1;display:flex;flex-direction:column}
+.row-body small{color:var(--mut);font-size:.78rem}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.card.center{text-align:center}
+.pill{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.prompt{font-size:1.15rem;line-height:1.45;font-weight:500}
+.note{color:var(--mut);font-size:.85rem;margin-bottom:10px}
+
+/* buttons */
+.primary{background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px 20px;font-size:1rem;font-weight:600;cursor:pointer;width:100%;transition:transform .1s,opacity .2s}
+.primary:active{transform:scale(.98)}
+.primary:disabled{opacity:.5}
+.primary.big{font-size:1.1rem;padding:16px}
+.ghost{background:transparent;border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:12px 18px;font-size:.92rem;cursor:pointer;width:100%}
+.ghost.sm{width:auto;padding:7px 14px;font-size:.82rem;margin-top:10px}
+.rec{background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:14px 20px;font-weight:600;cursor:pointer;flex:1}
+.rec.live{background:var(--bad);border-color:var(--bad);color:#fff;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.6}}
+
+/* speaking timer */
+.timer-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:14px}
+.timer{font-size:3.4rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;display:inline-flex;flex-direction:column;align-items:center}
+.timer small{font-size:.7rem;color:var(--mut);font-weight:500;text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+.timer.warn{color:var(--warn)}
+.timer.ready{color:var(--good)}
+.rec-row{display:flex;gap:10px;margin:16px 0 8px}
+.phase{font-size:.85rem;color:var(--mut);min-height:1.2em}
+#player{width:100%;margin-top:12px;border-radius:10px}
+
+/* framework / chips */
+.frame{padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
+.frame li{padding-left:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:20px;padding:8px 12px;font-size:.82rem;cursor:pointer}
+.chip:active{border-color:var(--accent)}
+.chip.mini{padding:4px 8px}
+
+/* rubric */
+.rub-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rub-row:last-of-type{border-bottom:none}
+.rub-lab{flex:1}
+.rub-lab small{display:block;color:var(--mut);font-size:.72rem}
+.rub-stars{display:flex;gap:2px}
+.rub-stars button{background:none;border:none;color:var(--line);font-size:1.4rem;cursor:pointer;padding:0 1px}
+.rub-stars button.on{color:var(--warn)}
+
+/* questions */
+.qh{margin:6px 0 12px}
+.qtext{font-weight:600;margin-bottom:12px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:11px;padding:13px 14px;font-size:.92rem;cursor:pointer;transition:border-color .15s}
+.opt:active{border-color:var(--accent)}
+.opt.right{background:rgba(52,211,153,.15);border-color:var(--good);color:#d1fae5}
+.opt.wrong{background:rgba(248,113,113,.13);border-color:var(--bad);color:#fecaca}
+.why,.why2{margin-top:10px;font-size:.85rem;color:var(--accent2);background:var(--card2);border-radius:10px;padding:10px 12px;line-height:1.45}
+
+/* transcript */
+.transcript summary{cursor:pointer;font-weight:600;color:var(--accent2);list-style:none}
+.transcript summary::-webkit-details-marker{display:none}
+.tr{margin-top:12px;display:flex;flex-direction:column;gap:8px;font-size:.88rem;color:var(--mut)}
+.tr b{color:var(--txt)}
+
+/* natural */
+.drill .stiff{font-size:1.05rem;color:var(--mut);font-style:italic;margin:6px 0 14px}
+.natural{font-size:1.15rem;font-weight:600;margin-bottom:8px;color:var(--good)}
+.nlist{display:flex;flex-direction:column;gap:10px}
+.nitem{background:var(--card2);border-radius:11px;padding:11px 13px}
+.ni-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.nitem small{display:block;color:var(--mut);font-size:.8rem;margin-top:3px}
+
+/* progress */
+.heat{display:flex;gap:5px;flex-wrap:wrap}
+.cell{width:18px;height:18px;border-radius:5px;background:var(--card2)}
+.cell.lvl1{background:#2a3170}.cell.lvl2{background:#4453c2}.cell.lvl3{background:#6c7bff}.cell.lvl4{background:#9aa6ff}
+.hist-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+.hist-row:last-child{border-bottom:none}
+.hist-row span{flex:1}
+.hist-row small{color:var(--mut);font-size:.74rem}
+
+.tip{color:var(--mut);font-size:.8rem;text-align:center;margin-top:8px;line-height:1.5}
+
+/* tab bar */
+.tabs{position:fixed;bottom:0;left:0;right:0;height:calc(var(--tab-h) + env(safe-area-inset-bottom,0));padding-bottom:env(safe-area-inset-bottom,0);background:rgba(14,14,20,.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);display:flex;z-index:20}
+.tabs button{flex:1;background:none;border:none;color:var(--mut);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-size:0}
+.tabs button span{font-size:1.25rem;filter:grayscale(1) opacity(.6)}
+.tabs button small{font-size:.66rem}
+.tabs button.on{color:var(--accent2)}
+.tabs button.on span{filter:none}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:calc(var(--tab-h) + env(safe-area-inset-bottom,0) + 16px);transform:translateX(-50%) translateY(20px);background:var(--accent);color:#fff;padding:12px 20px;border-radius:30px;font-size:.9rem;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:50;box-shadow:0 8px 30px rgba(108,123,255,.4)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  </style>
+</head>
+<body>
+  <main id="app"></main>
+  <script>
+/* ---- inlined data ---- */
+// CELPIP Speaking — 8 official task types, tuned for a CLB 12 target.
+// Each task has prep/response timing matching the real test, multiple prompts,
+// a model-answer framework, high-band "power phrases", and a self-assessment rubric.
+
+const SPEAKING_TASKS = [
+  {
+    id: 1,
+    title: "Giving Advice",
+    prep: 30,
+    response: 90,
+    blurb: "Advise a person about a situation. Be clear, structured, and supportive.",
+    prompts: [
+      "Your friend has been offered a job in another city but is unsure about moving. Give them advice.",
+      "A coworker keeps missing deadlines and is stressed. Advise them on how to manage their workload.",
+      "Your cousin wants to buy their first car but has a limited budget. Give them advice.",
+      "A friend wants to learn English faster for an exam. Advise them on the best approach."
+    ],
+    framework: [
+      "Acknowledge the situation (1 sentence): 'I can see why you'd feel torn about this.'",
+      "Give 2–3 concrete recommendations, each with a reason.",
+      "Add a 'what I would do' personal angle to sound natural.",
+      "Close with encouragement: 'Whatever you decide, I'm sure it'll work out.'"
+    ],
+    power: [
+      "If I were in your shoes, I'd…",
+      "The way I see it, you've got two solid options.",
+      "What's worked for me in the past is…",
+      "It might be worth weighing up the pros and cons.",
+      "At the end of the day, it's your call, but…"
+    ]
+  },
+  {
+    id: 2,
+    title: "Talking about a Personal Experience",
+    prep: 30,
+    response: 60,
+    blurb: "Tell a short story from your own life. Use vivid past-tense narration.",
+    prompts: [
+      "Describe a time you helped a stranger.",
+      "Talk about a memorable trip you took.",
+      "Describe a time you overcame a difficult challenge.",
+      "Talk about an accomplishment you're proud of."
+    ],
+    framework: [
+      "Set the scene: when, where, who (1 sentence).",
+      "Build the story with sequencing words (first, then, suddenly).",
+      "Add one emotional beat: how you felt in the moment.",
+      "End with the outcome and what it meant to you."
+    ],
+    power: [
+      "This happened a couple of years back, when…",
+      "Out of nowhere, …",
+      "To be honest, I was a little nervous at first.",
+      "Looking back on it, …",
+      "It's a memory that's really stuck with me."
+    ]
+  },
+  {
+    id: 3,
+    title: "Describing a Scene",
+    prep: 30,
+    response: 60,
+    blurb: "Describe a picture in detail. Cover people, place, actions, and atmosphere.",
+    prompts: [
+      "Describe a busy farmers' market on a sunny morning.",
+      "Describe a family having a picnic in a park.",
+      "Describe a crowded train station at rush hour.",
+      "Describe a group of friends celebrating at a restaurant."
+    ],
+    framework: [
+      "Overview first: 'This looks like a…'",
+      "Foreground → background, or left → right, systematically.",
+      "Use present continuous: 'A man is…', 'Some children are…'",
+      "Add inferred details: weather, mood, what just/likely happened."
+    ],
+    power: [
+      "In the foreground, …",
+      "Off to the left/right, you can see…",
+      "It looks as though…",
+      "Judging by their expressions, they seem…",
+      "In the background, there's…"
+    ]
+  },
+  {
+    id: 4,
+    title: "Making Predictions",
+    prep: 30,
+    response: 60,
+    blurb: "Predict what will happen next in a scene. Use future forms with reasons.",
+    prompts: [
+      "Predict what will happen next: dark clouds gather over an outdoor wedding.",
+      "Predict what will happen next: a child reaches for a glass near the table edge.",
+      "Predict what will happen next: two cyclists approach a sharp, wet corner.",
+      "Predict what will happen next: a chef carries a tall stack of plates."
+    ],
+    framework: [
+      "Describe the setup briefly (1 sentence).",
+      "Make 2–3 predictions, each with a 'because' justification.",
+      "Vary your future forms: will / going to / likely to / about to.",
+      "End with the most probable outcome."
+    ],
+    power: [
+      "It looks like they're about to…",
+      "Chances are, …",
+      "I'd say it's very likely that…",
+      "If that happens, then…",
+      "In all probability, …"
+    ]
+  },
+  {
+    id: 5,
+    title: "Comparing and Persuading",
+    prep: 60,
+    response: 60,
+    blurb: "Choose between two options for someone and persuade them of your choice.",
+    prompts: [
+      "Persuade a relative to choose either a beach holiday or a city holiday.",
+      "Recommend either a laptop or a tablet for a student and persuade them.",
+      "Persuade a friend to choose either a gym membership or home workouts.",
+      "Recommend either a house in the suburbs or an apartment downtown."
+    ],
+    framework: [
+      "State your recommendation clearly and confidently up front.",
+      "Give 2 strong reasons tailored to the person's needs.",
+      "Briefly acknowledge the other option, then dismiss it politely.",
+      "Close with a confident call to action."
+    ],
+    power: [
+      "Honestly, I'd go with… and here's why.",
+      "Given what you're after, this is the better fit.",
+      "Sure, the other one has its perks, but…",
+      "Trust me on this one — you won't regret it.",
+      "All things considered, this is the smarter choice."
+    ]
+  },
+  {
+    id: 6,
+    title: "Dealing with a Difficult Situation",
+    prep: 60,
+    response: 60,
+    blurb: "Navigate an awkward situation. Pick an approach and explain it tactfully.",
+    prompts: [
+      "Your friend lent you a jacket and you damaged it. Explain the situation to them.",
+      "You double-booked plans with two friends on the same night. Resolve it.",
+      "A neighbour's loud parties keep you awake. Address it with them.",
+      "You received the wrong order at a restaurant. Speak to the server."
+    ],
+    framework: [
+      "Choose ONE clear approach and commit to it.",
+      "Open diplomatically — soften before the issue.",
+      "State the problem and your proposed solution.",
+      "End on a cooperative, face-saving note."
+    ],
+    power: [
+      "I hope you don't mind me bringing this up, but…",
+      "I feel terrible about this — let me make it right.",
+      "Would it be possible to…?",
+      "I completely understand, and here's what I can do.",
+      "Let's find a way that works for both of us."
+    ]
+  },
+  {
+    id: 7,
+    title: "Expressing Opinions",
+    prep: 30,
+    response: 90,
+    blurb: "Give and defend your opinion on a statement. Take a firm, reasoned stance.",
+    prompts: [
+      "Some people think social media does more harm than good. Do you agree?",
+      "Should public transit be free for everyone? Give your opinion.",
+      "Is it better to work for a big company or a small one? Why?",
+      "Should students be required to learn a second language? Why or why not?"
+    ],
+    framework: [
+      "State your position unambiguously in the first sentence.",
+      "Give 2 reasons, each developed with an example.",
+      "Address a counterpoint, then rebut it.",
+      "Restate your position with a memorable closing line."
+    ],
+    power: [
+      "I firmly believe that…",
+      "There are a couple of reasons I feel this way.",
+      "Take, for example, …",
+      "Now, some might argue…, but I'd counter that…",
+      "So all in all, I'm convinced that…"
+    ]
+  },
+  {
+    id: 8,
+    title: "Describing an Unusual Situation",
+    prep: 30,
+    response: 60,
+    blurb: "Describe something strange in a picture to someone who can't see it.",
+    prompts: [
+      "Describe an unusual object you saw: a chair shaped like a giant hand.",
+      "Describe a strange sight: a dog wearing a full business suit.",
+      "Describe an odd scene: a car completely covered in grass.",
+      "Describe something unusual: a tree growing inside a living room."
+    ],
+    framework: [
+      "Name the unusual thing and your reaction (1 sentence).",
+      "Describe it precisely — size, colour, shape, position.",
+      "Compare it to something familiar to aid understanding.",
+      "Speculate about why it might be there."
+    ],
+    power: [
+      "You won't believe what I'm looking at.",
+      "It's roughly the size of…",
+      "It kind of reminds me of…",
+      "The strangest part is…",
+      "I can only assume that…"
+    ]
+  }
+];
+
+const SPEAKING_RUBRIC = [
+  { key: "content", label: "Content & coverage", hint: "Did you fully address the task and develop your ideas?" },
+  { key: "vocab", label: "Vocabulary range", hint: "Precise, varied, idiomatic word choice (CLB 11–12)." },
+  { key: "grammar", label: "Grammar accuracy", hint: "Complex structures used accurately and flexibly." },
+  { key: "fluency", label: "Fluency & flow", hint: "Smooth pace, minimal hesitation, natural rhythm." },
+  { key: "pron", label: "Pronunciation", hint: "Clear sounds, word stress, and sentence intonation." }
+];
+
+
+// CELPIP Listening practice. Passages are played via on-device Text-to-Speech
+// (works on iOS Safari). Each item: a transcript (spoken), then comprehension
+// questions with explanations. Covers the official listening part types.
+
+const LISTENING_SETS = [
+  {
+    id: "ls1",
+    part: "Part 1 — Problem Solving",
+    title: "The Missing Delivery",
+    voices: 2,
+    lines: [
+      { s: "Woman", t: "Hi, I'm calling about a package that was supposed to arrive on Tuesday. It's now Friday and I still haven't received it." },
+      { s: "Man", t: "I'm sorry to hear that. Could you give me your tracking number so I can look into it?" },
+      { s: "Woman", t: "Sure, it's BX-four-four-nine-two-zero-one." },
+      { s: "Man", t: "Thank you. It looks like the driver attempted delivery on Tuesday but no one was home, so it was returned to our depot." },
+      { s: "Woman", t: "That's strange — I was home all day Tuesday and no one knocked." },
+      { s: "Man", t: "I understand your frustration. The simplest fix would be to reschedule for tomorrow morning, or you could pick it up from the depot today after three o'clock." },
+      { s: "Woman", t: "I'd rather not drive across town. Let's reschedule for tomorrow, but please ask the driver to ring the doorbell this time." }
+    ],
+    questions: [
+      { q: "Why was the package not delivered on Tuesday?",
+        options: ["It was damaged in transit", "The address was wrong", "The driver said no one was home", "It was lost at the depot"],
+        answer: 2,
+        why: "The man says the driver 'attempted delivery but no one was home' — even though the woman disputes it." },
+      { q: "What solution does the woman finally choose?",
+        options: ["Pick up from the depot today", "Reschedule for tomorrow morning", "Cancel the order", "Have it sent to a neighbour"],
+        answer: 1,
+        why: "She rejects driving to the depot and says 'Let's reschedule for tomorrow.'" },
+      { q: "What special request does she make?",
+        options: ["A refund", "A discount on shipping", "That the driver ring the doorbell", "A morning phone call"],
+        answer: 2,
+        why: "She asks the driver to 'ring the doorbell this time.'" }
+    ]
+  },
+  {
+    id: "ls2",
+    part: "Part 2 — Daily Life Conversation",
+    title: "Weekend Plans",
+    voices: 2,
+    lines: [
+      { s: "Man", t: "Hey, do you have anything going on this weekend?" },
+      { s: "Woman", t: "Not much. I was thinking of finally trying that new hiking trail by the lake. Want to come?" },
+      { s: "Man", t: "I'd love to, but the forecast says rain on Saturday. Maybe Sunday would be safer?" },
+      { s: "Woman", t: "Good point. Sunday works for me. We could start early and grab brunch afterwards." },
+      { s: "Man", t: "Perfect. I'll bring my camera — the views from the ridge are supposed to be incredible." },
+      { s: "Woman", t: "Great. Let's meet at the trailhead around eight so we beat the crowds." }
+    ],
+    questions: [
+      { q: "Why do they change the day of their plan?",
+        options: ["The trail is closed Saturday", "Rain is forecast for Saturday", "The woman is busy Saturday", "The man has to work"],
+        answer: 1, why: "The man notes 'the forecast says rain on Saturday.'" },
+      { q: "What will they do after the hike?",
+        options: ["Go to the gym", "Have brunch", "Visit a museum", "Go shopping"],
+        answer: 1, why: "She suggests they 'grab brunch afterwards.'" },
+      { q: "Why do they plan to start at eight?",
+        options: ["To beat the crowds", "To catch the sunrise", "The trail closes early", "To avoid the heat"],
+        answer: 0, why: "She says 'so we beat the crowds.'" }
+    ]
+  },
+  {
+    id: "ls3",
+    part: "Part 4 — News Item",
+    title: "City Library Expansion",
+    voices: 1,
+    lines: [
+      { s: "Reporter", t: "The city council announced today that the downtown public library will undergo a major expansion beginning this autumn. The two-year project will add a dedicated children's wing, forty new study rooms, and a rooftop reading garden. Officials say the renovation responds to a thirty percent rise in library visits over the past three years, driven largely by demand for free workspace and community programs. During construction, core services will continue from a temporary location in the former post office on Main Street. The council expects the expanded library to open to the public in the spring of the year after next." }
+    ],
+    questions: [
+      { q: "What is the main reason for the expansion?",
+        options: ["A government grant required it", "A sharp rise in library visits", "The old building was unsafe", "A donation from a local business"],
+        answer: 1, why: "The rise of thirty percent in visits is cited as the driver." },
+      { q: "Where will services run during construction?",
+        options: ["A nearby school", "The city hall", "The former post office", "Online only"],
+        answer: 2, why: "Core services move 'to a temporary location in the former post office on Main Street.'" },
+      { q: "Which feature is NOT mentioned?",
+        options: ["A rooftop reading garden", "A children's wing", "A café", "New study rooms"],
+        answer: 2, why: "A café is never mentioned; the others all are." }
+    ]
+  },
+  {
+    id: "ls4",
+    part: "Part 6 — Viewpoints",
+    title: "Remote Work Debate",
+    voices: 1,
+    lines: [
+      { s: "Speaker", t: "When it comes to remote work, opinions remain sharply divided. Supporters argue that working from home boosts productivity by eliminating commutes and reducing office distractions. They also point to better work-life balance and access to a wider talent pool. Critics, however, contend that remote work weakens collaboration and makes it harder for junior employees to learn from mentors. Some managers worry about accountability, though studies increasingly suggest output, not hours, is what matters. My own view is that a hybrid model captures the best of both worlds: the focus of home and the spontaneous creativity of the office. The key is flexibility, not a one-size-fits-all mandate." }
+    ],
+    questions: [
+      { q: "What benefit of remote work do supporters mention?",
+        options: ["Higher salaries", "Eliminating commutes", "More office parties", "Shorter projects"],
+        answer: 1, why: "Supporters cite 'eliminating commutes and reducing office distractions.'" },
+      { q: "What concern do critics raise?",
+        options: ["It costs companies more", "It weakens collaboration and mentoring", "It is illegal in some places", "It requires expensive equipment"],
+        answer: 1, why: "Critics say it 'weakens collaboration and makes it harder for junior employees to learn from mentors.'" },
+      { q: "What is the speaker's own position?",
+        options: ["Fully remote is best", "Fully in-office is best", "A hybrid model is best", "Remote work should be banned"],
+        answer: 2, why: "The speaker favours 'a hybrid model' and 'flexibility, not a one-size-fits-all mandate.'" }
+    ]
+  },
+  {
+    id: "ls5",
+    part: "Part 3 — Information",
+    title: "How Sleep Cycles Work",
+    voices: 1,
+    lines: [
+      { s: "Speaker", t: "Each night, your brain moves through several sleep cycles, and each cycle lasts roughly ninety minutes. A cycle has two broad phases. First comes non-REM sleep, which includes the deep, slow-wave stage where your body repairs tissue and strengthens the immune system. Then comes REM sleep — rapid eye movement — when most vivid dreaming happens and the brain consolidates memories. Interestingly, REM periods grow longer toward morning, which is why you often wake from a dream. Experts recommend waking at the end of a cycle rather than the middle, because being roused from deep sleep is what leaves you groggy. This is why a shorter sleep that ends on a cycle boundary can sometimes feel more refreshing than a longer one cut off mid-cycle." }
+    ],
+    questions: [
+      { q: "About how long is one sleep cycle?",
+        options: ["30 minutes", "Ninety minutes", "Three hours", "Fifteen minutes"],
+        answer: 1, why: "The speaker states each cycle 'lasts roughly ninety minutes.'" },
+      { q: "What happens mainly during REM sleep?",
+        options: ["Tissue repair", "Vivid dreaming and memory consolidation", "Slow-wave deep rest", "The immune system shuts down"],
+        answer: 1, why: "REM is when 'most vivid dreaming happens and the brain consolidates memories.'" },
+      { q: "Why might a shorter sleep feel more refreshing?",
+        options: ["It avoids dreaming", "It ends on a cycle boundary instead of mid-cycle", "It includes more REM", "It skips deep sleep entirely"],
+        answer: 1, why: "Waking at a cycle boundary avoids the grogginess of being roused from deep sleep." }
+    ]
+  }
+];
+
+
+// Grammar drills — advanced points that matter for a CLB 11–12 score.
+// Each question gives instant feedback and an explanation that teaches the rule.
+
+const GRAMMAR_SETS = [
+  {
+    id: "g1",
+    title: "Verb Tenses & Aspect",
+    questions: [
+      { q: "By the time the meeting ended, we ___ for over three hours.",
+        options: ["talked", "have talked", "had been talking", "are talking"],
+        answer: 2,
+        why: "Past perfect continuous (had been talking) shows an action ongoing up to a point in the past." },
+      { q: "I ___ here since 2019, and I still love it.",
+        options: ["work", "have been working", "had worked", "am working"],
+        answer: 1,
+        why: "Present perfect continuous links a past start ('since 2019') to the present." },
+      { q: "This time next week, I ___ on a beach in Portugal.",
+        options: ["will lie", "will be lying", "lie", "have lain"],
+        answer: 1,
+        why: "Future continuous (will be lying) describes an action in progress at a future moment." },
+      { q: "She said she ___ the report by Friday.",
+        options: ["will finish", "would finish", "finishes", "had finish"],
+        answer: 1,
+        why: "In reported speech, 'will' shifts back to 'would'." }
+    ]
+  },
+  {
+    id: "g2",
+    title: "Conditionals",
+    questions: [
+      { q: "If I ___ about the traffic, I would have left earlier.",
+        options: ["knew", "had known", "would know", "know"],
+        answer: 1,
+        why: "Third conditional: 'if + past perfect, would have + participle' for unreal past." },
+      { q: "If you heat water to 100°C, it ___.",
+        options: ["would boil", "boiled", "boils", "will have boiled"],
+        answer: 2,
+        why: "Zero conditional for general truths uses present + present." },
+      { q: "Were I in charge, I ___ the policy immediately.",
+        options: ["will change", "would change", "changed", "have changed"],
+        answer: 1,
+        why: "Inverted second conditional ('Were I…') pairs with 'would + base'." },
+      { q: "If the package ___ today, please sign for it.",
+        options: ["arrived", "arrives", "would arrive", "had arrived"],
+        answer: 1,
+        why: "First conditional with a request: 'if + present, imperative'." }
+    ]
+  },
+  {
+    id: "g3",
+    title: "Articles & Determiners",
+    questions: [
+      { q: "She is ___ honest person and ___ best manager we've had.",
+        options: ["a / the", "an / the", "an / a", "the / the"],
+        answer: 1,
+        why: "'Honest' starts with a vowel sound → 'an'; superlatives take 'the'." },
+      { q: "I don't have ___ information about that.",
+        options: ["many", "much", "a few", "several"],
+        answer: 1,
+        why: "'Information' is uncountable, so use 'much' (not 'many')." },
+      { q: "___ of the two options is clearly better.",
+        options: ["Either", "Both", "All", "None"],
+        answer: 0,
+        why: "'Either' selects one of two; it takes a singular verb." },
+      { q: "There were ___ people at the event than expected.",
+        options: ["less", "fewer", "lesser", "little"],
+        answer: 1,
+        why: "'Fewer' is used with countable nouns (people); 'less' with uncountable." }
+    ]
+  },
+  {
+    id: "g4",
+    title: "Prepositions & Collocations",
+    questions: [
+      { q: "The decision was made ___ accordance ___ the new rules.",
+        options: ["on / to", "in / with", "by / of", "at / for"],
+        answer: 1,
+        why: "Fixed phrase: 'in accordance with'." },
+      { q: "She's responsible ___ training new staff.",
+        options: ["of", "to", "for", "on"],
+        answer: 2,
+        why: "'Responsible for' (a task); 'responsible to' would mean answerable to a person." },
+      { q: "We need to comply ___ the safety regulations.",
+        options: ["to", "with", "for", "on"],
+        answer: 1,
+        why: "'Comply with' is the correct collocation." },
+      { q: "I'm not very keen ___ spicy food.",
+        options: ["on", "of", "with", "for"],
+        answer: 0,
+        why: "'Keen on' something is the standard collocation." }
+    ]
+  },
+  {
+    id: "g5",
+    title: "Parallelism & Sentence Structure",
+    questions: [
+      { q: "Which sentence is grammatically parallel?",
+        options: [
+          "She likes hiking, to swim, and biking.",
+          "She likes hiking, swimming, and biking.",
+          "She likes to hike, swimming, and bikes.",
+          "She likes hike, swim, and to bike."],
+        answer: 1,
+        why: "All three items should share the same form: '-ing, -ing, -ing'." },
+      { q: "Choose the correctly punctuated sentence.",
+        options: [
+          "I finished the report, I sent it to my boss.",
+          "I finished the report I sent it to my boss.",
+          "I finished the report, and I sent it to my boss.",
+          "I finished the report and, I sent it to my boss."],
+        answer: 2,
+        why: "Two independent clauses need a comma + coordinating conjunction (comma splice avoided)." },
+      { q: "Which uses the modifier correctly?",
+        options: [
+          "Walking to work, the rain soaked my coat.",
+          "Walking to work, I got soaked by the rain.",
+          "The rain, walking to work, soaked me.",
+          "Soaked the rain me walking to work."],
+        answer: 1,
+        why: "The subject after the introductory phrase must be the one doing the walking — 'I'. Avoids a dangling modifier." },
+      { q: "Pick the most concise, formal version.",
+        options: [
+          "Due to the fact that it was late, we left.",
+          "Because it was late, we left.",
+          "On account of the lateness of the hour, we departed.",
+          "It being late, so we left."],
+        answer: 1,
+        why: "'Because' is concise and correct; 'due to the fact that' is wordy padding to avoid." }
+    ]
+  }
+];
+
+
+// Natural Speaking — the phrasing, rhythm, and idiom that separate a CLB 9
+// from a CLB 12. Cards to study + a "say it naturally" rephrasing drill.
+
+const NATURAL_CARDS = [
+  {
+    id: "n1",
+    title: "Connectors that sound effortless",
+    note: "Use these to glue ideas together instead of stacking 'and… and… and'.",
+    items: [
+      { phrase: "That said, …", use: "Soften or pivot after a point. ‘It's pricey. That said, it lasts for years.’" },
+      { phrase: "On top of that, …", use: "Add a stronger reason. ‘It's fast — and on top of that, it's cheap.’" },
+      { phrase: "The thing is, …", use: "Introduce the real issue. ‘The thing is, I'd already made plans.’" },
+      { phrase: "As far as I'm concerned, …", use: "Mark a strong opinion." },
+      { phrase: "To be fair, …", use: "Concede a point before disagreeing." }
+    ]
+  },
+  {
+    id: "n2",
+    title: "Everyday idioms (use sparingly, naturally)",
+    note: "One or two well-placed idioms lift your band. Don't force them.",
+    items: [
+      { phrase: "a piece of cake", use: "very easy. ‘The interview was a piece of cake.’" },
+      { phrase: "on the same page", use: "in agreement. ‘Let's make sure we're on the same page.’" },
+      { phrase: "call it a day", use: "stop for now. ‘We're tired — let's call it a day.’" },
+      { phrase: "a blessing in disguise", use: "a hidden positive. ‘Missing that flight was a blessing in disguise.’" },
+      { phrase: "go the extra mile", use: "make extra effort. ‘She always goes the extra mile for clients.’" }
+    ]
+  },
+  {
+    id: "n3",
+    title: "Smart fillers (buy time without 'um')",
+    note: "Replace dead 'uhh' with phrases that sound thoughtful and fluent.",
+    items: [
+      { phrase: "Let me think for a second…", use: "Buys time gracefully." },
+      { phrase: "That's a good question.", use: "Natural stall while you plan." },
+      { phrase: "How do I put this…", use: "Signals you're choosing words carefully." },
+      { phrase: "Off the top of my head, …", use: "Introduce a quick estimate or example." },
+      { phrase: "Well, it depends, really.", use: "Open a nuanced answer." }
+    ]
+  },
+  {
+    id: "n4",
+    title: "Sound less robotic: contractions & softeners",
+    note: "High scorers contract and hedge naturally. Full forms sound stiff.",
+    items: [
+      { phrase: "I'd / I've / I'll / it's / they're", use: "Always contract in speaking." },
+      { phrase: "kind of / sort of", use: "Soften: ‘It's kind of expensive.’" },
+      { phrase: "a bit / a little", use: "Hedge: ‘I'm a bit unsure.’" },
+      { phrase: "probably / I guess / I'd say", use: "Adds natural uncertainty." },
+      { phrase: "you know what I mean?", use: "Light conversational checking — use once, not constantly." }
+    ]
+  },
+  {
+    id: "n5",
+    title: "Pronunciation & intonation tips",
+    note: "Tap a tip's example with the 🔊 button to hear it spoken.",
+    items: [
+      { phrase: "Stress content words, not function words.", use: "I REALLY WANT to GO to the BEACH.", speak: "I really want to go to the beach." },
+      { phrase: "Rise then fall for statements.", use: "Pitch up on the key word, glide down at the end.", speak: "The view from the top was absolutely stunning." },
+      { phrase: "Use linking between words.", use: "‘turn off’ → ‘tur-noff’; ‘an apple’ → ‘a-napple’.", speak: "Could you turn off the lights and grab an apple?" },
+      { phrase: "Pause at commas — don't rush.", use: "Chunking makes you sound in control.", speak: "First, I'd weigh the options, and then, I'd decide." }
+    ]
+  }
+];
+
+// "Say it naturally" — rewrite a stiff sentence into fluent, high-band English.
+const NATURAL_DRILLS = [
+  { stiff: "It is my opinion that this is a very good idea.",
+    natural: "Honestly, I think that's a great idea.",
+    tip: "Drop 'It is my opinion that' — use 'I think' / 'Honestly'." },
+  { stiff: "I am in agreement with your statement.",
+    natural: "Yeah, I'm with you on that.",
+    tip: "Contract and use everyday phrasing in speaking." },
+  { stiff: "The reason is because I was very tired.",
+    natural: "It's just that I was exhausted.",
+    tip: "'The reason is because' is redundant; avoid it." },
+  { stiff: "I will go to do the shopping later.",
+    natural: "I'll pop out to do some shopping later.",
+    tip: "Use 'I'll' and a phrasal verb to sound natural." },
+  { stiff: "This situation is very difficult for me.",
+    natural: "This is a bit of a tricky spot for me.",
+    tip: "Idiomatic 'tricky spot' + softener 'a bit of'." },
+  { stiff: "I do not know the answer at this moment.",
+    natural: "I'm not sure off the top of my head.",
+    tip: "Natural fillers beat stiff full forms." }
+];
+
+
+/* ---- inlined app ---- */
+
+/* ---------- tiny helpers ---------- */
+const $ = (sel, root = document) => root.querySelector(sel);
+const el = (html) => { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; };
+const app = $("#app");
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const todayKey = () => new Date().toISOString().slice(0, 10);
+
+/* ---------- persistent store ---------- */
+const STORE_KEY = "celpip12.v1";
+const store = {
+  data: JSON.parse(localStorage.getItem(STORE_KEY) || "{}"),
+  save() { localStorage.setItem(STORE_KEY, JSON.stringify(this.data)); },
+  get(k, d) { return this.data[k] ?? d; },
+  set(k, v) { this.data[k] = v; this.save(); },
+};
+function logActivity(kind) {
+  const log = store.get("activity", {});
+  const day = todayKey();
+  log[day] = (log[day] || 0) + 1;
+  store.set("activity", log);
+  bumpStreak();
+}
+function bumpStreak() {
+  const last = store.get("lastDay", null);
+  const day = todayKey();
+  if (last === day) return;
+  let streak = store.get("streak", 0);
+  const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+  streak = last === yesterday ? streak + 1 : 1;
+  store.set("streak", streak);
+  store.set("lastDay", day);
+}
+function addPoints(kind, n) {
+  const stats = store.get("stats", {});
+  stats[kind] = (stats[kind] || 0) + n;
+  store.set("stats", stats);
+}
+
+/* ---------- speech (TTS) ---------- */
+const TTS = {
+  voices: [],
+  init() {
+    if (!("speechSynthesis" in window)) return;
+    const load = () => { this.voices = speechSynthesis.getVoices(); };
+    load();
+    speechSynthesis.onvoiceschanged = load;
+  },
+  pick(name) {
+    const en = this.voices.filter(v => /en[-_]/i.test(v.lang));
+    if (name === "Woman") return en.find(v => /female|samantha|victoria|karen|moira|tessa|zira/i.test(v.name)) || en[0];
+    if (name === "Man") return en.find(v => /male|daniel|alex|fred|aaron|arthur/i.test(v.name)) || en[1] || en[0];
+    return en[0];
+  },
+  speak(text, who, { rate = 0.98 } = {}) {
+    return new Promise((resolve) => {
+      if (!("speechSynthesis" in window)) { resolve(); return; }
+      const u = new SpeechSynthesisUtterance(text);
+      const v = this.pick(who);
+      if (v) u.voice = v;
+      u.lang = (v && v.lang) || "en-US";
+      u.rate = rate; u.pitch = who === "Man" ? 0.95 : 1.05;
+      u.onend = resolve; u.onerror = resolve;
+      speechSynthesis.speak(u);
+    });
+  },
+  stop() { if ("speechSynthesis" in window) speechSynthesis.cancel(); },
+};
+
+/* ---------- router ---------- */
+const routes = {
+  "": renderHome,
+  "speaking": renderSpeakingList,
+  "speaking-task": renderSpeakingTask,
+  "listening": renderListeningList,
+  "listening-set": renderListeningSet,
+  "grammar": renderGrammarList,
+  "grammar-set": renderGrammarSet,
+  "natural": renderNatural,
+  "progress": renderProgress,
+};
+function go(hash) { location.hash = hash; }
+function router() {
+  TTS.stop();
+  const raw = location.hash.replace(/^#\/?/, "");
+  const [name, arg] = raw.split("/");
+  const fn = routes[name || ""] || renderHome;
+  app.innerHTML = "";
+  app.scrollTop = 0;
+  window.scrollTo(0, 0);
+  fn(arg);
+  highlightTab(name || "");
+}
+window.addEventListener("hashchange", router);
+
+/* ---------- shared UI ---------- */
+function header(title, sub, back) {
+  return `
+  <header class="hd">
+    ${back ? `<button class="back" onclick="history.back()" aria-label="Back">‹</button>` : `<span class="logo">≋</span>`}
+    <div class="hd-txt"><h1>${esc(title)}</h1>${sub ? `<p>${esc(sub)}</p>` : ""}</div>
+  </header>`;
+}
+function moduleCard(icon, title, desc, hash, tag) {
+  return `<button class="mcard" onclick="location.hash='${hash}'">
+    <span class="mc-ic">${icon}</span>
+    <span class="mc-body"><span class="mc-title">${esc(title)} ${tag ? `<em>${esc(tag)}</em>` : ""}</span>
+    <span class="mc-desc">${esc(desc)}</span></span>
+    <span class="mc-go">›</span>
+  </button>`;
+}
+
+/* ---------- HOME ---------- */
+function renderHome() {
+  const streak = store.get("streak", 0);
+  const stats = store.get("stats", {});
+  const done = (stats.speaking || 0) + (stats.listening || 0) + (stats.grammar || 0) + (stats.natural || 0);
+  const log = store.get("activity", {});
+  const todayCount = log[todayKey()] || 0;
+  const plan = dailyPlan();
+
+  const v = el(`<div class="view">
+    ${header("CELPIP 12", "Speaking · Listening · Grammar")}
+    <section class="hero">
+      <div class="hero-target"><span class="t-num">12</span><span class="t-lab">target band</span></div>
+      <div class="hero-stats">
+        <div><b>${streak}</b><span>day streak</span></div>
+        <div><b>${done}</b><span>sessions</span></div>
+        <div><b>${todayCount}</b><span>today</span></div>
+      </div>
+    </section>
+
+    <section class="plan">
+      <h2>Today's plan</h2>
+      <div class="plan-list">
+        ${plan.map(p => `<button class="plan-item" onclick="location.hash='${p.hash}'">
+          <span class="pi-dot ${todayCount > p.order ? "on" : ""}"></span>
+          <span class="pi-txt">${esc(p.label)}</span><span class="pi-go">›</span></button>`).join("")}
+      </div>
+    </section>
+
+    <section class="modules">
+      ${moduleCard("🎙", "Speaking", "All 8 task types · record, time, self-score", "#/speaking", "focus")}
+      ${moduleCard("🎧", "Listening", "Audio passages + comprehension", "#/listening", "focus")}
+      ${moduleCard("✓", "Grammar", "Targeted drills for CLB 11–12", "#/grammar")}
+      ${moduleCard("💬", "Natural Speaking", "Idioms, connectors, sound fluent", "#/natural")}
+      ${moduleCard("📈", "Progress", "Streaks and session history", "#/progress")}
+    </section>
+    <p class="tip">Tip: do all four plan items daily. Consistency beats cramming for a 12.</p>
+  </div>`);
+  app.append(v);
+}
+function dailyPlan() {
+  // rotate a speaking task & listening set by day so it feels fresh
+  const d = new Date().getDate();
+  const st = SPEAKING_TASKS[d % SPEAKING_TASKS.length];
+  const ls = LISTENING_SETS[d % LISTENING_SETS.length];
+  const gs = GRAMMAR_SETS[d % GRAMMAR_SETS.length];
+  return [
+    { order: 0, label: `Speaking: ${st.title}`, hash: `#/speaking-task/${st.id}` },
+    { order: 1, label: `Listening: ${ls.title}`, hash: `#/listening-set/${ls.id}` },
+    { order: 2, label: `Grammar: ${gs.title}`, hash: `#/grammar-set/${gs.id}` },
+    { order: 3, label: `Natural speaking drill`, hash: `#/natural` },
+  ];
+}
+
+/* ---------- SPEAKING ---------- */
+function renderSpeakingList() {
+  const v = el(`<div class="view">
+    ${header("Speaking", "8 official task types", true)}
+    <div class="list">
+      ${SPEAKING_TASKS.map(t => `<button class="row" onclick="location.hash='#/speaking-task/${t.id}'">
+        <span class="row-n">${t.id}</span>
+        <span class="row-body"><b>${esc(t.title)}</b><small>${t.prep}s prep · ${t.response}s speak</small></span>
+        <span class="row-go">›</span></button>`).join("")}
+    </div>
+  </div>`);
+  app.append(v);
+}
+
+function renderSpeakingTask(arg) {
+  app.innerHTML = ""; TTS.stop();
+  const task = SPEAKING_TASKS.find(t => String(t.id) === String(arg)) || SPEAKING_TASKS[0];
+  const prompt = task.prompts[Math.floor(Math.random() * task.prompts.length)];
+  const v = el(`<div class="view">
+    ${header(task.title, `Task ${task.id} · ${task.prep}s prep · ${task.response}s speak`, true)}
+    <section class="card">
+      <span class="pill">Prompt</span>
+      <p class="prompt">${esc(prompt)}</p>
+      <button class="ghost sm" id="newPrompt">↻ New prompt</button>
+    </section>
+
+    <section class="timer-wrap">
+      <div class="timer" id="timer">${task.prep}<small>prep</small></div>
+      <div class="rec-row">
+        <button class="primary" id="startBtn">Start prep</button>
+        <button class="rec" id="recBtn" disabled>● Record</button>
+      </div>
+      <audio id="player" controls hidden></audio>
+      <p class="phase" id="phase">Read the prompt, then start your 30-second prep.</p>
+    </section>
+
+    <section class="card">
+      <h3>Answer framework</h3>
+      <ol class="frame">${task.framework.map(f => `<li>${esc(f)}</li>`).join("")}</ol>
+    </section>
+    <section class="card">
+      <h3>Power phrases <em>(CLB 12)</em></h3>
+      <div class="chips">${task.power.map(p => `<button class="chip" data-say="${esc(p)}">${esc(p)} 🔊</button>`).join("")}</div>
+    </section>
+
+    <section class="card rubric" id="rubric" hidden>
+      <h3>Score your own answer</h3>
+      ${SPEAKING_RUBRIC.map(r => `<div class="rub-row">
+        <div class="rub-lab"><b>${esc(r.label)}</b><small>${esc(r.hint)}</small></div>
+        <div class="rub-stars" data-key="${r.key}">${[1,2,3,4,5].map(n => `<button data-n="${n}">★</button>`).join("")}</div>
+      </div>`).join("")}
+      <button class="primary" id="saveScore">Save session</button>
+    </section>
+  </div>`);
+  app.append(v);
+
+  // chips speak
+  v.querySelectorAll("[data-say]").forEach(b => b.addEventListener("click", () => TTS.speak(b.dataset.say, "Woman")));
+  $("#newPrompt", v).addEventListener("click", () => renderSpeakingTask(arg));
+
+  // rubric scoring
+  const scores = {};
+  v.querySelectorAll(".rub-stars").forEach(group => {
+    group.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => {
+      const n = +btn.dataset.n; scores[group.dataset.key] = n;
+      group.querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.n <= n));
+    }));
+  });
+  $("#saveScore", v).addEventListener("click", () => {
+    logActivity("speaking"); addPoints("speaking", 1);
+    const hist = store.get("speakHist", []);
+    hist.unshift({ day: todayKey(), task: task.title, scores });
+    store.set("speakHist", hist.slice(0, 50));
+    toast("Session saved 💪");
+    go("#/speaking");
+  });
+
+  // timer + recorder
+  setupSpeakingFlow(task, v);
+}
+
+function setupSpeakingFlow(task, root) {
+  const timerEl = $("#timer", root), phaseEl = $("#phase", root);
+  const startBtn = $("#startBtn", root), recBtn = $("#recBtn", root);
+  const player = $("#player", root), rubric = $("#rubric", root);
+  let interval, mediaRecorder, chunks = [], stream;
+
+  function countdown(seconds, label, onDone) {
+    clearInterval(interval);
+    let t = seconds;
+    timerEl.innerHTML = `${t}<small>${label}</small>`;
+    interval = setInterval(() => {
+      t--;
+      timerEl.innerHTML = `${Math.max(t,0)}<small>${label}</small>`;
+      timerEl.classList.toggle("warn", t <= 5);
+      if (t <= 0) { clearInterval(interval); onDone(); }
+    }, 1000);
+  }
+
+  startBtn.addEventListener("click", () => {
+    startBtn.disabled = true;
+    phaseEl.textContent = "Prep time — plan your structure.";
+    countdown(task.prep, "prep", () => {
+      phaseEl.textContent = "Go! Tap Record and speak now.";
+      recBtn.disabled = false;
+      timerEl.classList.add("ready");
+      timerEl.innerHTML = `${task.response}<small>speak</small>`;
+      navigator.vibrate && navigator.vibrate(120);
+    });
+  });
+
+  recBtn.addEventListener("click", async () => {
+    if (mediaRecorder && mediaRecorder.state === "recording") { stopRec(); return; }
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      phaseEl.textContent = "⚠️ Microphone blocked. Allow mic access in Safari settings to record.";
+      rubric.hidden = false; return;
+    }
+    chunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => e.data.size && chunks.push(e.data);
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: chunks[0]?.type || "audio/webm" });
+      player.src = URL.createObjectURL(blob); player.hidden = false;
+      stream.getTracks().forEach(t => t.stop());
+      rubric.hidden = false;
+      rubric.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    mediaRecorder.start();
+    recBtn.textContent = "■ Stop";
+    recBtn.classList.add("live");
+    phaseEl.textContent = "Recording… speak clearly and keep going.";
+    countdown(task.response, "speak", () => stopRec());
+  });
+
+  function stopRec() {
+    clearInterval(interval);
+    if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+    recBtn.textContent = "● Record"; recBtn.classList.remove("live"); recBtn.disabled = true;
+    phaseEl.textContent = "Nice. Play it back, then score yourself honestly below.";
+  }
+}
+
+/* ---------- LISTENING ---------- */
+function renderListeningList() {
+  const v = el(`<div class="view">
+    ${header("Listening", "Plays on-device · tap to start", true)}
+    <div class="list">
+      ${LISTENING_SETS.map(s => `<button class="row" onclick="location.hash='#/listening-set/${s.id}'">
+        <span class="row-ic">🎧</span>
+        <span class="row-body"><b>${esc(s.title)}</b><small>${esc(s.part)}</small></span>
+        <span class="row-go">›</span></button>`).join("")}
+    </div>
+    <p class="tip">Audio uses your device's built-in voices. Turn your volume up and silent mode off.</p>
+  </div>`);
+  app.append(v);
+}
+
+function renderListeningSet(arg) {
+  const set = LISTENING_SETS.find(s => s.id === arg) || LISTENING_SETS[0];
+  const v = el(`<div class="view">
+    ${header(set.title, set.part, true)}
+    <section class="card center">
+      <button class="primary big" id="playBtn">▶ Play audio</button>
+      <button class="ghost sm" id="stopBtn" hidden>■ Stop</button>
+      <p class="phase" id="lphase">Listen carefully — you can replay once. Questions unlock after playback.</p>
+    </section>
+    <section id="qzone" hidden></section>
+    <details class="card transcript"><summary>Show transcript</summary>
+      <div class="tr">${set.lines.map(l => `<p><b>${esc(l.s)}:</b> ${esc(l.t)}</p>`).join("")}</div>
+    </details>
+  </div>`);
+  app.append(v);
+
+  const playBtn = $("#playBtn", v), stopBtn = $("#stopBtn", v), lphase = $("#lphase", v);
+  let played = 0;
+
+  async function play() {
+    playBtn.disabled = true; stopBtn.hidden = false;
+    lphase.textContent = "▶ Playing…";
+    for (const line of set.lines) {
+      await TTS.speak(line.t, set.voices === 1 ? "Woman" : line.s);
+      if (!document.body.contains(v)) return;
+    }
+    played++;
+    stopBtn.hidden = true; playBtn.disabled = false;
+    playBtn.textContent = played >= 2 ? "▶ Replay (used)" : "▶ Replay (1 left)";
+    if (played >= 2) playBtn.disabled = true;
+    lphase.textContent = "Now answer the questions below.";
+    showQuestions();
+  }
+  playBtn.addEventListener("click", play);
+  stopBtn.addEventListener("click", () => { TTS.stop(); stopBtn.hidden = true; playBtn.disabled = false; });
+
+  function showQuestions() {
+    const qzone = $("#qzone", v);
+    if (!qzone.hidden) return;
+    qzone.hidden = false;
+    qzone.innerHTML = `<h2 class="qh">Questions</h2>` + set.questions.map((q, qi) => `
+      <div class="card q" data-qi="${qi}">
+        <p class="qtext">${qi + 1}. ${esc(q.q)}</p>
+        <div class="opts">${q.options.map((o, oi) =>
+          `<button class="opt" data-oi="${oi}">${esc(o)}</button>`).join("")}</div>
+        <p class="why" hidden></p>
+      </div>`).join("") + `<button class="primary" id="finishL" hidden>See result</button>`;
+
+    let answered = 0; let correct = 0;
+    qzone.querySelectorAll(".q").forEach(card => {
+      const qi = +card.dataset.qi; const q = set.questions[qi];
+      card.querySelectorAll(".opt").forEach(btn => btn.addEventListener("click", () => {
+        if (card.classList.contains("done")) return;
+        card.classList.add("done");
+        const oi = +btn.dataset.oi;
+        card.querySelectorAll(".opt").forEach((b, i) => {
+          if (i === q.answer) b.classList.add("right");
+          else if (i === oi) b.classList.add("wrong");
+          b.disabled = true;
+        });
+        const why = $(".why", card); why.hidden = false; why.textContent = "💡 " + q.why;
+        if (oi === q.answer) correct++;
+        answered++;
+        if (answered === set.questions.length) {
+          const fin = $("#finishL", qzone); fin.hidden = false;
+          fin.onclick = () => {
+            logActivity("listening"); addPoints("listening", 1);
+            const pct = Math.round(correct / set.questions.length * 100);
+            toast(`Listening: ${correct}/${set.questions.length} (${pct}%)`);
+            go("#/listening");
+          };
+        }
+      }));
+    });
+  }
+}
+
+/* ---------- GRAMMAR ---------- */
+function renderGrammarList() {
+  const v = el(`<div class="view">
+    ${header("Grammar", "Targeted drills for a high band", true)}
+    <div class="list">
+      ${GRAMMAR_SETS.map(s => `<button class="row" onclick="location.hash='#/grammar-set/${s.id}'">
+        <span class="row-ic">✓</span>
+        <span class="row-body"><b>${esc(s.title)}</b><small>${s.questions.length} questions</small></span>
+        <span class="row-go">›</span></button>`).join("")}
+    </div>
+  </div>`);
+  app.append(v);
+}
+function renderGrammarSet(arg) {
+  const set = GRAMMAR_SETS.find(s => s.id === arg) || GRAMMAR_SETS[0];
+  const v = el(`<div class="view">
+    ${header(set.title, "Tap an answer for instant feedback", true)}
+    <div id="gzone">${set.questions.map((q, qi) => `
+      <div class="card q" data-qi="${qi}">
+        <p class="qtext">${qi + 1}. ${esc(q.q)}</p>
+        <div class="opts">${q.options.map((o, oi) =>
+          `<button class="opt" data-oi="${oi}">${esc(o)}</button>`).join("")}</div>
+        <p class="why" hidden></p>
+      </div>`).join("")}</div>
+    <button class="primary" id="finishG" hidden>Finish set</button>
+  </div>`);
+  app.append(v);
+
+  let answered = 0, correct = 0;
+  v.querySelectorAll(".q").forEach(card => {
+    const qi = +card.dataset.qi, q = set.questions[qi];
+    card.querySelectorAll(".opt").forEach(btn => btn.addEventListener("click", () => {
+      if (card.classList.contains("done")) return;
+      card.classList.add("done");
+      const oi = +btn.dataset.oi;
+      card.querySelectorAll(".opt").forEach((b, i) => {
+        if (i === q.answer) b.classList.add("right");
+        else if (i === oi) b.classList.add("wrong");
+        b.disabled = true;
+      });
+      const why = $(".why", card); why.hidden = false; why.textContent = "💡 " + q.why;
+      if (oi === q.answer) correct++;
+      if (++answered === set.questions.length) {
+        const fin = $("#finishG", v); fin.hidden = false;
+        fin.onclick = () => {
+          logActivity("grammar"); addPoints("grammar", 1);
+          toast(`Grammar: ${correct}/${set.questions.length} correct`);
+          go("#/grammar");
+        };
+      }
+    }));
+  });
+}
+
+/* ---------- NATURAL SPEAKING ---------- */
+function renderNatural() {
+  app.innerHTML = ""; TTS.stop();
+  const drill = NATURAL_DRILLS[Math.floor(Math.random() * NATURAL_DRILLS.length)];
+  const v = el(`<div class="view">
+    ${header("Natural Speaking", "Sound like a 12, not a textbook", true)}
+    <section class="card drill">
+      <span class="pill">Say it naturally</span>
+      <p class="stiff">“${esc(drill.stiff)}”</p>
+      <button class="primary" id="reveal">Reveal natural version</button>
+      <div id="answer" hidden>
+        <p class="natural">“${esc(drill.natural)}” <button class="chip" data-say="${esc(drill.natural)}">🔊</button></p>
+        <p class="why2">💡 ${esc(drill.tip)}</p>
+        <button class="ghost sm" id="nextDrill">↻ Another</button>
+      </div>
+    </section>
+    ${NATURAL_CARDS.map(c => `<section class="card">
+      <h3>${esc(c.title)}</h3>
+      <p class="note">${esc(c.note)}</p>
+      <div class="nlist">${c.items.map(it => `<div class="nitem">
+        <div class="ni-top"><b>${esc(it.phrase)}</b>
+          <button class="chip mini" data-say="${esc(it.speak || it.phrase)}">🔊</button></div>
+        ${it.use ? `<small>${esc(it.use)}</small>` : ""}</div>`).join("")}</div>
+    </section>`).join("")}
+    <button class="primary" id="doneN">Mark practiced</button>
+  </div>`);
+  app.append(v);
+
+  v.querySelectorAll("[data-say]").forEach(b => b.addEventListener("click", () => TTS.speak(b.dataset.say, "Woman")));
+  $("#reveal", v).addEventListener("click", () => { $("#answer", v).hidden = false; $("#reveal", v).hidden = true; });
+  const nd = $("#nextDrill", v); nd && nd.addEventListener("click", () => renderNatural());
+  $("#doneN", v).addEventListener("click", () => { logActivity("natural"); addPoints("natural", 1); toast("Nice — practiced ✓"); go("#/"); });
+}
+
+/* ---------- PROGRESS ---------- */
+function renderProgress() {
+  app.innerHTML = "";
+  const stats = store.get("stats", {});
+  const streak = store.get("streak", 0);
+  const log = store.get("activity", {});
+  const speakHist = store.get("speakHist", []);
+  // last 14 days heat row
+  const days = [...Array(14)].map((_, i) => {
+    const d = new Date(Date.now() - (13 - i) * 864e5).toISOString().slice(0, 10);
+    return { d, n: log[d] || 0 };
+  });
+  const v = el(`<div class="view">
+    ${header("Progress", "Keep the streak alive", true)}
+    <section class="hero compact">
+      <div class="hero-stats wide">
+        <div><b>${streak}</b><span>streak</span></div>
+        <div><b>${stats.speaking||0}</b><span>speaking</span></div>
+        <div><b>${stats.listening||0}</b><span>listening</span></div>
+        <div><b>${stats.grammar||0}</b><span>grammar</span></div>
+      </div>
+    </section>
+    <section class="card">
+      <h3>Last 14 days</h3>
+      <div class="heat">${days.map(d => `<span class="cell lvl${Math.min(d.n,4)}" title="${d.d}: ${d.n}"></span>`).join("")}</div>
+    </section>
+    <section class="card">
+      <h3>Recent speaking self-scores</h3>
+      ${speakHist.length ? speakHist.slice(0,8).map(h => {
+        const vals = Object.values(h.scores||{}); const avg = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : "–";
+        return `<div class="hist-row"><span>${esc(h.task)}</span><b>${avg}/5</b><small>${esc(h.day)}</small></div>`;
+      }).join("") : `<p class="note">No speaking sessions yet. Record one to track yourself.</p>`}
+    </section>
+    <button class="ghost" id="reset">Reset all progress</button>
+  </div>`);
+  app.append(v);
+  $("#reset", v).addEventListener("click", () => {
+    if (confirm("Reset all progress and history?")) { localStorage.removeItem(STORE_KEY); store.data = {}; renderProgress(); }
+  });
+}
+
+/* ---------- bottom tab bar ---------- */
+function buildTabs() {
+  const tabs = [
+    ["", "≋", "Home"], ["speaking", "🎙", "Speak"], ["listening", "🎧", "Listen"],
+    ["grammar", "✓", "Grammar"], ["natural", "💬", "Natural"],
+  ];
+  const bar = el(`<nav class="tabs">${tabs.map(([h, ic, lab]) =>
+    `<button data-tab="${h}" onclick="location.hash='#/${h}'"><span>${ic}</span><small>${lab}</small></button>`).join("")}</nav>`);
+  document.body.append(bar);
+}
+function highlightTab(name) {
+  document.querySelectorAll(".tabs button").forEach(b => {
+    const t = b.dataset.tab;
+    const active = (t === "" && name === "") ||
+      (t !== "" && (name === t || name === `${t}-task` || name === `${t}-set`));
+    b.classList.toggle("on", active);
+  });
+}
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg) {
+  let t = $("#toast");
+  if (!t) { t = el(`<div id="toast"></div>`); document.body.append(t); }
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+/* ---------- boot ---------- */
+TTS.init();
+buildTabs();
+if (!location.hash) location.hash = "#/";
+router();
+
+// register service worker for installable / offline use
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+}
+
+  </script>
+</body>
+</html>
