@@ -23,11 +23,17 @@ microphone access for speaking practice, and offline support.
 
 | Module | What it does |
 | --- | --- |
+| **📝 Mock Exams** | Full timed simulations that chain **Listening → Reading → Writing → Speaking** back to back, then give a scored breakdown with an **estimated band**. |
 | **🎙 Speaking** | All **8 official CELPIP task types** with real prep/response timers, in-app **microphone recording + playback**, an answer framework, CLB-12 "power phrases" (tap to hear them), and a self-scoring rubric. |
 | **🎧 Listening** | Audio passages across the official part types (Problem Solving, Conversation, Information, News, Viewpoints), played by your device's voice, followed by comprehension questions with explanations and a transcript. |
+| **🎓 Lessons & Tips** | A library of band-12 strategies and tricks across Speaking, Listening, Writing, Grammar, Natural speaking, and overall test-day game plan. |
 | **✓ Grammar** | Targeted drills (tenses, conditionals, articles, prepositions, parallelism) with instant feedback that teaches the rule. |
 | **💬 Natural Speaking** | Idioms, connectors, smart fillers, contractions, and pronunciation tips, plus a "say it naturally" rephrasing drill — to sound like a 12, not a textbook. |
+| **⚙️ Settings** | Pick the most natural **on-device voice** for listening (ranked best-first, Canadian-English preferred) and adjust speaking speed — no cloud APIs, no cost. Includes a guide to download free Enhanced/Siri voices. |
 | **📈 Progress** | Daily streak, session counts, a 14-day activity grid, and your recent speaking self-scores. |
+
+### A note on the voice (natural, no paid APIs)
+All audio uses the **Web Speech API** with your device's *local* voices — completely free and offline, with **no usage limits**. The app ranks the installed voices and automatically picks the most natural one (preferring Siri / "Enhanced" / "Premium" / neural voices, and Canadian English to match CELPIP). For a dramatic upgrade on iPhone, download a free high-quality voice once via **Settings → Accessibility → Spoken Content → Voices → English → (Enhanced/Premium)**, then select it under ⚙ in the app.
 
 The home screen gives you a rotating **daily plan** so you touch every skill each day.
 

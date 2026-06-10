@@ -26,6 +26,32 @@ body{
 .hd-txt p{color:var(--mut);font-size:.85rem;margin-top:2px}
 .logo{font-size:1.6rem;color:var(--accent)}
 .back{background:var(--card);border:1px solid var(--line);color:var(--txt);width:38px;height:38px;border-radius:50%;font-size:1.5rem;line-height:1;cursor:pointer;flex:none}
+.gear{margin-left:auto;background:var(--card);border:1px solid var(--line);color:var(--mut);width:38px;height:38px;border-radius:50%;font-size:1.1rem;line-height:1;cursor:pointer;flex:none}
+.gear:active{color:var(--txt);border-color:var(--accent)}
+
+/* settings */
+.select{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:11px;padding:13px;font-size:.95rem;margin-bottom:14px;-webkit-appearance:none;appearance:none}
+.slabel{display:flex;justify-content:space-between;align-items:center;font-size:.9rem;margin:6px 0}
+.slabel b{color:var(--accent2)}
+.range{width:100%;margin:4px 0 16px;accent-color:var(--accent)}
+
+/* writing box */
+.writebox{width:100%;min-height:180px;background:var(--card2);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:13px;font-size:1rem;line-height:1.5;font-family:inherit;resize:vertical}
+.wcount{font-size:.82rem;color:var(--mut);margin:8px 0 14px;text-align:right}
+.wcount.ok{color:var(--good)}
+.wcount.ok #wc,.wcount #wc{font-weight:700}
+.checks{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;cursor:pointer}
+.check input{margin-top:3px;accent-color:var(--accent);flex:none;width:18px;height:18px}
+
+/* reading passage */
+.passage{background:var(--card2);border-radius:11px;padding:14px;font-size:.92rem;line-height:1.6;margin:6px 0 12px;color:var(--txt)}
+
+/* mock progress */
+.mock-prog{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+.mp{flex:1;min-width:60px;text-align:center;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:6px 4px}
+.mp.done{color:var(--good);border-color:var(--good)}
+.mp.cur{color:#fff;background:var(--accent);border-color:var(--accent)}
 
 /* hero */
 .hero{background:linear-gradient(135deg,#1a1b2e,#141420);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;align-items:center;gap:20px;margin-bottom:18px}

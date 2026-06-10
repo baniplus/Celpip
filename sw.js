@@ -1,5 +1,5 @@
 // Offline-first service worker. Bump CACHE when files change.
-const CACHE = "celpip12-v1";
+const CACHE = "celpip12-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -10,6 +10,9 @@ const ASSETS = [
   "./js/data/listening.js",
   "./js/data/grammar.js",
   "./js/data/natural.js",
+  "./js/data/reading.js",
+  "./js/data/mock.js",
+  "./js/data/lessons.js",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png",

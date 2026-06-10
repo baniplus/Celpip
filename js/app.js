@@ -2,6 +2,9 @@ import { SPEAKING_TASKS, SPEAKING_RUBRIC } from "./data/speaking.js";
 import { LISTENING_SETS } from "./data/listening.js";
 import { GRAMMAR_SETS } from "./data/grammar.js";
 import { NATURAL_CARDS, NATURAL_DRILLS } from "./data/natural.js";
+import { READING_PASSAGES } from "./data/reading.js";
+import { MOCK_EXAMS } from "./data/mock.js";
+import { LESSONS, LESSON_SKILL_ORDER } from "./data/lessons.js";
 
 /* ---------- tiny helpers ---------- */
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -41,32 +44,73 @@ function addPoints(kind, n) {
   store.set("stats", stats);
 }
 
-/* ---------- speech (TTS) ---------- */
+/* ---------- speech (TTS) — uses the device's best on-device voice (no APIs) ---------- */
 const TTS = {
   voices: [],
   init() {
     if (!("speechSynthesis" in window)) return;
-    const load = () => { this.voices = speechSynthesis.getVoices(); };
+    const load = () => {
+      const vs = speechSynthesis.getVoices();
+      if (vs && vs.length) this.voices = vs;
+    };
     load();
-    speechSynthesis.onvoiceschanged = load;
+    speechSynthesis.addEventListener("voiceschanged", load);
   },
-  pick(name) {
-    const en = this.voices.filter(v => /en[-_]/i.test(v.lang));
-    if (name === "Woman") return en.find(v => /female|samantha|victoria|karen|moira|tessa|zira/i.test(v.name)) || en[0];
-    if (name === "Man") return en.find(v => /male|daniel|alex|fred|aaron|arthur/i.test(v.name)) || en[1] || en[0];
-    return en[0];
+  englishVoices() {
+    const en = this.voices.filter(v => /^en([-_]|$)/i.test(v.lang));
+    return (en.length ? en : this.voices).slice().sort((a, b) => this.quality(b) - this.quality(a));
   },
-  speak(text, who, { rate = 0.98 } = {}) {
-    return new Promise((resolve) => {
-      if (!("speechSynthesis" in window)) { resolve(); return; }
-      const u = new SpeechSynthesisUtterance(text);
-      const v = this.pick(who);
-      if (v) u.voice = v;
-      u.lang = (v && v.lang) || "en-US";
-      u.rate = rate; u.pitch = who === "Man" ? 0.95 : 1.05;
-      u.onend = resolve; u.onerror = resolve;
-      speechSynthesis.speak(u);
-    });
+  // Rank voices so the most natural-sounding local voice wins.
+  quality(v) {
+    const n = (v.name + " " + (v.voiceURI || "")).toLowerCase();
+    let s = 0;
+    if (/siri/.test(n)) s += 70;                                  // iOS neural Siri voices
+    if (/(enhanced|premium|neural|natural)/.test(n)) s += 55;     // downloadable HQ voices
+    if (/(google|microsoft)/.test(n)) s += 30;                    // good on Android/desktop
+    if (/(ava|samantha|allison|joelle|nicky|zoe|serena|evan|nathan|tom|aaron|noelle)/.test(n)) s += 12;
+    if (/(compact|eloquence|fred|albert|bad news|whisper|organ|bells|trinoids|zarvox)/.test(n)) s -= 60; // novelty/low-quality
+    if (/en[-_]ca/i.test(v.lang)) s += 14;                        // CELPIP = Canadian English
+    if (/en[-_]us/i.test(v.lang)) s += 8;
+    if (/en[-_]gb/i.test(v.lang)) s += 4;
+    return s;
+  },
+  best() {
+    const en = this.englishVoices();
+    const saved = store.get("voiceURI", null);
+    if (saved) { const f = en.find(v => v.voiceURI === saved); if (f) return f; }
+    return en[0] || this.voices[0] || null;
+  },
+  // For dialogues, pick a contrasting but still high-quality voice per speaker.
+  pick(who) {
+    const base = this.best();
+    if (who !== "Man" && who !== "Woman") return base;
+    const en = this.englishVoices();
+    const female = /(female|woman|ava|samantha|allison|victoria|karen|moira|tessa|zoe|serena|kate|joelle|nicky|noelle|zira)/i;
+    const male = /(male|man|daniel|alex|aaron|arthur|tom|evan|nathan|oliver|reed|rishi|gordon)/i;
+    const want = who === "Woman" ? female : male;
+    const avoid = who === "Woman" ? male : female;
+    return en.find(v => want.test(v.name)) || en.find(v => !avoid.test(v.name)) || base;
+  },
+  rate() { return store.get("rate", 0.95); },
+  // Split into sentence chunks so intonation resets and we get natural micro-pauses.
+  chunks(text) { return (text.match(/[^.!?]+[.!?]*/g) || [text]).map(s => s.trim()).filter(Boolean); },
+  async speak(text, who, opts = {}) {
+    if (!("speechSynthesis" in window)) return;
+    const voice = this.pick(who);
+    const rate = opts.rate || this.rate();
+    const pitch = opts.pitch != null ? opts.pitch : (who === "Man" ? 0.92 : 1.06);
+    const parts = opts.noChunk ? [text] : this.chunks(text);
+    for (let i = 0; i < parts.length; i++) {
+      await new Promise((resolve) => {
+        const u = new SpeechSynthesisUtterance(parts[i]);
+        if (voice) u.voice = voice;
+        u.lang = (voice && voice.lang) || "en-US";
+        u.rate = rate; u.pitch = pitch;
+        u.onend = resolve; u.onerror = resolve;
+        speechSynthesis.speak(u);
+      });
+      if (i < parts.length - 1) await new Promise(r => setTimeout(r, 110)); // natural pause
+    }
   },
   stop() { if ("speechSynthesis" in window) speechSynthesis.cancel(); },
 };
@@ -81,6 +125,11 @@ const routes = {
   "grammar": renderGrammarList,
   "grammar-set": renderGrammarSet,
   "natural": renderNatural,
+  "mock": renderMockList,
+  "mock-run": renderMock,
+  "lessons": renderLessons,
+  "lesson": renderLesson,
+  "settings": renderSettings,
   "progress": renderProgress,
 };
 function go(hash) { location.hash = hash; }
@@ -103,6 +152,7 @@ function header(title, sub, back) {
   <header class="hd">
     ${back ? `<button class="back" onclick="history.back()" aria-label="Back">‹</button>` : `<span class="logo">≋</span>`}
     <div class="hd-txt"><h1>${esc(title)}</h1>${sub ? `<p>${esc(sub)}</p>` : ""}</div>
+    <button class="gear" onclick="location.hash='#/settings'" aria-label="Settings">⚙</button>
   </header>`;
 }
 function moduleCard(icon, title, desc, hash, tag) {
@@ -144,13 +194,15 @@ function renderHome() {
     </section>
 
     <section class="modules">
+      ${moduleCard("📝", "Mock Exams", "Full timed simulations + estimated band", "#/mock", "new")}
       ${moduleCard("🎙", "Speaking", "All 8 task types · record, time, self-score", "#/speaking", "focus")}
       ${moduleCard("🎧", "Listening", "Audio passages + comprehension", "#/listening", "focus")}
+      ${moduleCard("🎓", "Lessons & Tips", "Strategies & tricks for a 12", "#/lessons")}
       ${moduleCard("✓", "Grammar", "Targeted drills for CLB 11–12", "#/grammar")}
       ${moduleCard("💬", "Natural Speaking", "Idioms, connectors, sound fluent", "#/natural")}
       ${moduleCard("📈", "Progress", "Streaks and session history", "#/progress")}
     </section>
-    <p class="tip">Tip: do all four plan items daily. Consistency beats cramming for a 12.</p>
+    <p class="tip">Tip: tap ⚙ to choose a more natural voice for Listening. Do your daily plan — consistency beats cramming for a 12.</p>
   </div>`);
   app.append(v);
 }
@@ -533,22 +585,322 @@ function renderProgress() {
   });
 }
 
+/* ---------- shared quiz helper (used by mock listening & reading) ---------- */
+function buildQuiz(container, questions, onComplete) {
+  container.insertAdjacentHTML("beforeend", questions.map((q, qi) => `
+    <div class="card q" data-qi="${qi}">
+      <p class="qtext">${qi + 1}. ${esc(q.q)}</p>
+      <div class="opts">${q.options.map((o, oi) => `<button class="opt" data-oi="${oi}">${esc(o)}</button>`).join("")}</div>
+      <p class="why" hidden></p>
+    </div>`).join(""));
+  let answered = 0, correct = 0;
+  container.querySelectorAll(".q:not(.bound)").forEach(card => {
+    card.classList.add("bound");
+    const qi = +card.dataset.qi, q = questions[qi];
+    card.querySelectorAll(".opt").forEach(btn => btn.addEventListener("click", () => {
+      if (card.classList.contains("done")) return;
+      card.classList.add("done");
+      const oi = +btn.dataset.oi;
+      card.querySelectorAll(".opt").forEach((b, i) => {
+        if (i === q.answer) b.classList.add("right");
+        else if (i === oi) b.classList.add("wrong");
+        b.disabled = true;
+      });
+      const why = $(".why", card);
+      if (q.why) { why.hidden = false; why.textContent = "💡 " + q.why; }
+      if (oi === q.answer) correct++;
+      if (++answered === questions.length) onComplete(correct);
+    }));
+  });
+}
+
+/* ---------- SETTINGS (voice quality) ---------- */
+function renderSettings() {
+  app.innerHTML = "";
+  const en = TTS.englishVoices();
+  const current = TTS.best();
+  const rate = TTS.rate();
+  const v = el(`<div class="view">
+    ${header("Settings", "Make the voice sound natural", true)}
+    <section class="card">
+      <h3>Listening voice</h3>
+      <p class="note">Choose the most natural voice installed on your device. The list is ranked best-first; Canadian English matches CELPIP.</p>
+      ${en.length ? `<select id="voiceSel" class="select">
+        ${en.map(vo => `<option value="${esc(vo.voiceURI)}" ${current && vo.voiceURI === current.voiceURI ? "selected" : ""}>${esc(vo.name)} — ${esc(vo.lang)}</option>`).join("")}
+      </select>` : `<p class="note">⏳ Voices are still loading. Tap “Test voice”, or reopen this screen in a second.</p>`}
+      <label class="slabel">Speaking speed <b id="rateVal">${rate.toFixed(2)}×</b></label>
+      <input id="rateSel" class="range" type="range" min="0.7" max="1.15" step="0.05" value="${rate}" />
+      <button class="primary" id="testVoice">🔊 Test voice</button>
+    </section>
+    <section class="card">
+      <h3>Get a much more natural voice (free)</h3>
+      <p class="note">Built-in “compact” voices sound robotic. iPhone has free high-quality voices you download once:</p>
+      <ol class="frame">
+        <li>Open <b>Settings → Accessibility → Spoken Content → Voices → English</b>.</li>
+        <li>Pick a voice and download an <b>“Enhanced”</b>, <b>“Premium”</b>, or <b>Siri</b> version (e.g. <i>Ava, Samantha, or a Canadian voice</i>).</li>
+        <li>Come back here and select that voice above — listening will sound far more human.</li>
+      </ol>
+      <p class="note">On Android, install voices via <b>Settings → System → Languages → Text-to-speech</b> (Google TTS).</p>
+    </section>
+    <button class="ghost" id="resetAll">Reset all progress &amp; settings</button>
+  </div>`);
+  app.append(v);
+
+  const sel = $("#voiceSel", v);
+  if (sel) sel.addEventListener("change", () => store.set("voiceURI", sel.value));
+  const rs = $("#rateSel", v), rv = $("#rateVal", v);
+  rs.addEventListener("input", () => { rv.textContent = (+rs.value).toFixed(2) + "×"; store.set("rate", +rs.value); });
+  $("#testVoice", v).addEventListener("click", () => {
+    TTS.stop();
+    TTS.speak("Hi there. This is how the listening passages will sound. Let's aim for band twelve.", "Woman");
+  });
+  $("#resetAll", v).addEventListener("click", () => {
+    if (confirm("Reset all progress and settings?")) { localStorage.removeItem(STORE_KEY); store.data = {}; go("#/"); }
+  });
+}
+
+/* ---------- MOCK EXAMS ---------- */
+function renderMockList() {
+  app.innerHTML = "";
+  const v = el(`<div class="view">
+    ${header("Mock Exams", "Simulate test day", true)}
+    <section class="card">
+      <p class="note">Each mock runs Listening → Reading → Writing → Speaking back to back, then gives you a scored summary with an estimated band. Find a quiet spot and don't pause.</p>
+    </section>
+    <div class="list">
+      ${MOCK_EXAMS.map(m => `<button class="row" onclick="location.hash='#/mock-run/${m.id}'">
+        <span class="row-ic">📝</span>
+        <span class="row-body"><b>${esc(m.title)}</b><small>${esc(m.blurb)}</small></span>
+        <span class="row-go">›</span></button>`).join("")}
+    </div>
+    <p class="tip">Stamina matters: doing one full mock teaches pacing better than ten single drills.</p>
+  </div>`);
+  app.append(v);
+}
+
+function renderMock(arg) {
+  const mock = MOCK_EXAMS.find(m => m.id === arg) || MOCK_EXAMS[0];
+  const results = {
+    listening: { correct: 0, total: 0 },
+    reading: { correct: 0, total: 0 },
+    writing: { words: 0, done: false },
+    speaking: { recorded: 0, total: 0 }
+  };
+  let si = 0;
+
+  function progressBar() {
+    return `<div class="mock-prog">${mock.sections.map((s, i) =>
+      `<span class="mp ${i < si ? "done" : ""} ${i === si ? "cur" : ""}">${esc(s.title.split(" ")[0])}</span>`).join("")}</div>`;
+  }
+  function sectionHead(extra) {
+    const sec = mock.sections[si];
+    return `${header(mock.title, `Section ${si + 1} of ${mock.sections.length}`, true)}
+      ${progressBar()}
+      <section class="card center"><span class="pill">${esc(sec.title)}</span>
+      ${sec.minutes ? `<p class="note">Suggested time: ${sec.minutes} minutes${extra || ""}</p>` : (extra ? `<p class="note">${extra.replace(/^ · /, "")}</p>` : "")}</section>`;
+  }
+  function run() {
+    app.innerHTML = ""; TTS.stop(); window.scrollTo(0, 0);
+    if (si >= mock.sections.length) return summary();
+    const sec = mock.sections[si];
+    const next = () => { si++; run(); };
+    ({ listening: secListening, reading: secReading, writing: secWriting, speaking: secSpeaking }[sec.type])(sec, next);
+  }
+
+  function secListening(sec, next) {
+    const sets = sec.setIds.map(id => LISTENING_SETS.find(s => s.id === id)).filter(Boolean);
+    results.listening.total += sets.reduce((a, s) => a + s.questions.length, 0);
+    const v = el(`<div class="view">${sectionHead(" · play each clip once")}
+      <div id="msets"></div>
+      <button class="primary" id="msNext" hidden>Continue →</button></div>`);
+    app.append(v);
+    const wrap = $("#msets", v); let done = 0, corr = 0;
+    sets.forEach((set, idx) => {
+      const block = el(`<section class="card">
+        <span class="pill">Clip ${idx + 1} · ${esc(set.part)}</span>
+        <button class="primary" data-p="${idx}">▶ Play clip ${idx + 1}</button>
+        <div class="qhost" hidden></div></section>`);
+      wrap.append(block);
+      const btn = block.querySelector("[data-p]"), qhost = block.querySelector(".qhost");
+      let played = false;
+      btn.addEventListener("click", async () => {
+        if (played) return; played = true; btn.disabled = true; btn.textContent = "▶ Playing…";
+        for (const line of set.lines) { await TTS.speak(line.t, set.voices === 1 ? "Woman" : line.s); if (!document.body.contains(v)) return; }
+        btn.textContent = "✓ Played"; qhost.hidden = false;
+        buildQuiz(qhost, set.questions, c => { corr += c; if (++done === sets.length) { results.listening.correct += corr; $("#msNext", v).hidden = false; } });
+      });
+    });
+    $("#msNext", v).addEventListener("click", next);
+  }
+
+  function secReading(sec, next) {
+    const ps = sec.passageIds.map(id => READING_PASSAGES.find(p => p.id === id)).filter(Boolean);
+    results.reading.total += ps.reduce((a, p) => a + p.questions.length, 0);
+    const v = el(`<div class="view">${sectionHead(" · read, then answer")}
+      <div id="mread"></div>
+      <button class="primary" id="mrNext" hidden>Continue →</button></div>`);
+    app.append(v);
+    const wrap = $("#mread", v); let done = 0, corr = 0;
+    ps.forEach(p => {
+      const block = el(`<section class="card">
+        <span class="pill">${esc(p.part)}</span>
+        <h3>${esc(p.title)}</h3>
+        <div class="passage">${esc(p.text).replace(/\n/g, "<br>")}</div>
+        <div class="qhost"></div></section>`);
+      wrap.append(block);
+      buildQuiz(block.querySelector(".qhost"), p.questions, c => { corr += c; if (++done === ps.length) { results.reading.correct += corr; $("#mrNext", v).hidden = false; } });
+    });
+    $("#mrNext", v).addEventListener("click", next);
+  }
+
+  function secWriting(sec, next) {
+    const v = el(`<div class="view">${sectionHead("")}
+      <section class="card"><span class="pill">Prompt</span><p class="prompt">${esc(sec.prompt)}</p></section>
+      <section class="card">
+        <textarea id="wt" class="writebox" placeholder="Write your response here…"></textarea>
+        <div class="wcount"><span id="wc">0</span> words · target ${sec.minWords}–${sec.maxWords}</div>
+        <h3>Self-check before you submit</h3>
+        <div class="checks">${sec.checklist.map((c, i) => `<label class="check"><input type="checkbox" data-i="${i}"> <span>${esc(c)}</span></label>`).join("")}</div>
+        <button class="primary" id="wSubmit">Submit &amp; continue →</button>
+      </section></div>`);
+    app.append(v);
+    const ta = $("#wt", v), wc = $("#wc", v);
+    const count = () => (ta.value.trim().match(/\S+/g) || []).length;
+    ta.addEventListener("input", () => {
+      const n = count(); wc.textContent = n;
+      wc.parentElement.classList.toggle("ok", n >= sec.minWords && n <= sec.maxWords);
+    });
+    $("#wSubmit", v).addEventListener("click", () => { results.writing.words = count(); results.writing.done = true; next(); });
+  }
+
+  function secSpeaking(sec, next) {
+    const tasks = sec.taskIds.map(id => SPEAKING_TASKS.find(t => t.id === id)).filter(Boolean);
+    results.speaking.total += tasks.length;
+    let ti = 0;
+    function oneTask() {
+      app.innerHTML = ""; TTS.stop(); window.scrollTo(0, 0);
+      if (ti >= tasks.length) return next();
+      const task = tasks[ti];
+      const prompt = task.prompts[Math.floor(Math.random() * task.prompts.length)];
+      const v = el(`<div class="view">${header(mock.title, `Speaking ${ti + 1} of ${tasks.length}`, true)}
+        <section class="card"><span class="pill">${esc(task.title)}</span><p class="prompt">${esc(prompt)}</p></section>
+        <section class="timer-wrap">
+          <div class="timer" id="t">${task.prep}<small>prep</small></div>
+          <div class="rec-row"><button class="primary" id="start">Start prep</button>
+          <button class="rec" id="rec" disabled>● Record</button></div>
+          <audio id="pl" controls hidden></audio>
+          <p class="phase" id="ph">${task.prep}s prep, then ${task.response}s to speak.</p>
+        </section>
+        <button class="ghost" id="skip">Skip / Next task →</button></div>`);
+      app.append(v);
+      const tEl = $("#t", v), ph = $("#ph", v), start = $("#start", v), rec = $("#rec", v), pl = $("#pl", v);
+      let iv, mr, chunks = [], stream;
+      const cd = (sec2, lab, done) => { clearInterval(iv); let t = sec2; tEl.innerHTML = `${t}<small>${lab}</small>`; iv = setInterval(() => { t--; tEl.innerHTML = `${Math.max(t, 0)}<small>${lab}</small>`; tEl.classList.toggle("warn", t <= 5); if (t <= 0) { clearInterval(iv); done(); } }, 1000); };
+      start.addEventListener("click", () => { start.disabled = true; ph.textContent = "Prep — jot keywords."; cd(task.prep, "prep", () => { ph.textContent = "Go! Tap Record."; rec.disabled = false; tEl.classList.add("ready"); tEl.innerHTML = `${task.response}<small>speak</small>`; navigator.vibrate && navigator.vibrate(120); }); });
+      const stop = () => { clearInterval(iv); if (mr && mr.state === "recording") mr.stop(); rec.textContent = "● Record"; rec.classList.remove("live"); rec.disabled = true; ph.textContent = "Recorded. Play it back, then continue."; };
+      rec.addEventListener("click", async () => {
+        if (mr && mr.state === "recording") return stop();
+        try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+        catch (e) { ph.textContent = "⚠️ Mic blocked — allow access in Safari settings."; return; }
+        chunks = []; mr = new MediaRecorder(stream);
+        mr.ondataavailable = e => e.data.size && chunks.push(e.data);
+        mr.onstop = () => { pl.src = URL.createObjectURL(new Blob(chunks, { type: chunks[0]?.type || "audio/webm" })); pl.hidden = false; stream.getTracks().forEach(t => t.stop()); results.speaking.recorded++; };
+        mr.start(); rec.textContent = "■ Stop"; rec.classList.add("live"); ph.textContent = "Recording…"; cd(task.response, "speak", stop);
+      });
+      $("#skip", v).addEventListener("click", () => { TTS.stop(); ti++; oneTask(); });
+    }
+    oneTask();
+  }
+
+  function bandFrom(pct) {
+    if (pct >= 90) return 11; if (pct >= 80) return 10; if (pct >= 70) return 9;
+    if (pct >= 60) return 8; if (pct >= 50) return 7; if (pct >= 40) return 6; return 5;
+  }
+  function summary() {
+    logActivity("mock"); addPoints("mock", 1);
+    const l = results.listening, r = results.reading;
+    const lPct = l.total ? Math.round(l.correct / l.total * 100) : 0;
+    const rPct = r.total ? Math.round(r.correct / r.total * 100) : 0;
+    const objPct = (l.total + r.total) ? Math.round((l.correct + r.correct) / (l.total + r.total) * 100) : 0;
+    const band = bandFrom(objPct);
+    const hist = store.get("mockHist", []);
+    hist.unshift({ day: todayKey(), title: mock.title, lPct, rPct, band });
+    store.set("mockHist", hist.slice(0, 30));
+    app.innerHTML = "";
+    const v = el(`<div class="view">${header("Results", mock.title, true)}
+      <section class="hero compact"><div class="hero-target"><span class="t-num">${band}+</span><span class="t-lab">est. band</span></div>
+        <div class="hero-stats"><div><b>${lPct}%</b><span>listening</span></div><div><b>${rPct}%</b><span>reading</span></div></div></section>
+      <section class="card">
+        <h3>Breakdown</h3>
+        <div class="hist-row"><span>Listening</span><b>${l.correct}/${l.total}</b><small>${lPct}%</small></div>
+        <div class="hist-row"><span>Reading</span><b>${r.correct}/${r.total}</b><small>${rPct}%</small></div>
+        <div class="hist-row"><span>Writing</span><b>${results.writing.words} words</b><small>${results.writing.done ? "submitted" : "—"}</small></div>
+        <div class="hist-row"><span>Speaking</span><b>${results.speaking.recorded}/${results.speaking.total}</b><small>recorded</small></div>
+      </section>
+      <section class="card"><p class="note">Listening &amp; Reading are auto-scored to estimate your band. Writing and Speaking are practice — review your recordings against the rubric in the Speaking module, and re-read your email against the self-check. The estimate is a guide, not an official score.</p></section>
+      <button class="primary" onclick="location.hash='#/mock'">Back to mock exams</button>
+    </div>`);
+    app.append(v);
+  }
+
+  run();
+}
+
+/* ---------- LESSONS & TIPS ---------- */
+function renderLessons() {
+  app.innerHTML = "";
+  const bySkill = {};
+  LESSONS.forEach(l => { (bySkill[l.skill] = bySkill[l.skill] || []).push(l); });
+  const order = LESSON_SKILL_ORDER.filter(s => bySkill[s]);
+  const v = el(`<div class="view">
+    ${header("Lessons & Tips", "Strategies for a 12", true)}
+    ${order.map(skill => `<section>
+      <h2>${esc(skill)}</h2>
+      <div class="list">${bySkill[skill].map(l => `<button class="row" onclick="location.hash='#/lesson/${l.id}'">
+        <span class="row-ic">${l.icon}</span>
+        <span class="row-body"><b>${esc(l.title)}</b><small>${esc(l.summary)}</small></span>
+        <span class="row-go">›</span></button>`).join("")}</div>
+    </section>`).join("")}
+  </div>`);
+  app.append(v);
+}
+function renderLesson(arg) {
+  app.innerHTML = "";
+  const l = LESSONS.find(x => x.id === arg) || LESSONS[0];
+  const v = el(`<div class="view">
+    ${header(l.title, `${l.skill} · tips`, true)}
+    <section class="card"><p class="note">${esc(l.summary)}</p></section>
+    <section class="card"><ol class="frame">${l.points.map(p => `<li>${esc(p)}</li>`).join("")}</ol></section>
+    ${l.phrases ? `<section class="card"><h3>Try saying these <em>🔊</em></h3>
+      <div class="chips">${l.phrases.map(p => `<button class="chip" data-say="${esc(p)}">${esc(p)} 🔊</button>`).join("")}</div></section>` : ""}
+    <button class="ghost" id="markDone">Mark studied ✓</button>
+  </div>`);
+  app.append(v);
+  v.querySelectorAll("[data-say]").forEach(b => b.addEventListener("click", () => { TTS.stop(); TTS.speak(b.dataset.say, "Woman"); }));
+  $("#markDone", v).addEventListener("click", () => { logActivity("lesson"); addPoints("lesson", 1); toast("Nice — studied ✓"); go("#/lessons"); });
+}
+
 /* ---------- bottom tab bar ---------- */
 function buildTabs() {
   const tabs = [
     ["", "≋", "Home"], ["speaking", "🎙", "Speak"], ["listening", "🎧", "Listen"],
-    ["grammar", "✓", "Grammar"], ["natural", "💬", "Natural"],
+    ["mock", "📝", "Mock"], ["lessons", "🎓", "Lessons"],
   ];
   const bar = el(`<nav class="tabs">${tabs.map(([h, ic, lab]) =>
     `<button data-tab="${h}" onclick="location.hash='#/${h}'"><span>${ic}</span><small>${lab}</small></button>`).join("")}</nav>`);
   document.body.append(bar);
 }
+const TAB_MATCH = {
+  "": [""],
+  speaking: ["speaking", "speaking-task"],
+  listening: ["listening", "listening-set"],
+  mock: ["mock", "mock-run"],
+  lessons: ["lessons", "lesson"],
+};
 function highlightTab(name) {
   document.querySelectorAll(".tabs button").forEach(b => {
     const t = b.dataset.tab;
-    const active = (t === "" && name === "") ||
-      (t !== "" && (name === t || name === `${t}-task` || name === `${t}-set`));
-    b.classList.toggle("on", active);
+    b.classList.toggle("on", (TAB_MATCH[t] || [t]).includes(name));
   });
 }
 
